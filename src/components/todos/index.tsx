@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 type Todo = {
   title: string; // プロパティ content は文字列型
   readonly id: number;
+  completed_flg: boolean; // 今回の追加
 };
 
 
@@ -23,8 +24,10 @@ const Todo: React.FC = () => {
 
       // 新しい Todo を作成
       const newTodo: Todo = {
-        title: text, // text ステートの値を content プロパティへ
+        title: text,
         id: nextId,
+        // 初期値は false
+        completed_flg: false,
       };
 
       setTodos((prevTodos) => [newTodo, ...prevTodos]);
@@ -56,6 +59,19 @@ const Todo: React.FC = () => {
       });
     };
 
+    const handleCheck = (id: number, completed_flg: boolean) => {
+      setTodos((todos) => {
+        const newTodos = todos.map((todo) => {
+          if (todo.id === id) {
+            return { ...todo, completed_flg };
+          }
+          return todo;
+        });
+
+        return newTodos;
+      });
+    };
+
   return (
     <div>
       <form
@@ -69,15 +85,22 @@ const Todo: React.FC = () => {
           value={text} // フォームの入力値をステートにバインド
           onChange={(e) => setText(e.target.value)} // 入力値が変わった時にステートを更新
         />
-         <button className="insert-btn" type="submit">追加</button>{/* ボタンをクリックしてもonSubmitをトリガーしない */}
+         <button className="insert-btn" type="submit">追加</button> {/* ボタンをクリックしてもonSubmitをトリガーしない */}
       </form>
       <ul>
         {todos.map((todo) => {
           return (
             <li key={todo.id}>
               <input
+                type="checkbox"
+                checked={todo.completed_flg}
+                // 呼び出し側で checked フラグを反転させる
+                onChange={() => handleCheck(todo.id, !todo.completed_flg)}
+              />
+              <input
                 type="text"
                 value={todo.title}
+                disabled={todo.completed_flg}
                 onChange={(e) => handleEdit(todo.id, e.target.value)}
               />
             </li>
