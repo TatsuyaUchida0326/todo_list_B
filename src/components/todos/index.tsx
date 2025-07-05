@@ -14,6 +14,7 @@ type Todo = {
   endDate: string;   // yyyy-mm-dd 形式
   progress: number;  // 0-100
   showDetail: boolean; // アコーディオン表示
+  detail?: string; // 詳細自由入力欄
 };
 
 type Filter = 'all' | 'completed' | 'unchecked' | 'delete';
@@ -145,9 +146,9 @@ const Todo: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1em' }}>
         <div style={{ fontSize: '2em', fontWeight: 'bold', marginBottom: '0.5em' }}>{formatDate(currentDate)}</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1em' }}>
-          <button onClick={() => changeDate(-1)}>前の日</button>
-          <button className="back-button" onClick={() => navigate('/')} title="カレンダーに戻る">カレンダーに戻る</button>
-          <button onClick={() => changeDate(1)}>次の日</button>
+          <button className="button-yellow" onClick={() => changeDate(-1)}>前の日</button>
+          <button className="button-yellow long back-button" onClick={() => navigate('/')} title="カレンダーに戻る">カレンダーに戻る</button>
+          <button className="button-yellow" onClick={() => changeDate(1)}>次の日</button>
         </div>
       </div>
       <select
@@ -161,9 +162,7 @@ const Todo: React.FC = () => {
       </select>
       {/* フィルターが `delete` のときは「ごみ箱を空にする」ボタンを表示 */}
       {filter === 'delete' ? (
-        <button onClick={handleEmpty}>
-          ごみ箱を空にする
-        </button>
+        <button onClick={handleEmpty} className="button-yellow">ごみ箱を空にする</button>
       ) : (
         // フィルターが `completed` でなければ Todo 入力フォームを表示
         filter !== 'completed' && (
@@ -178,80 +177,139 @@ const Todo: React.FC = () => {
               value={text} // フォームの入力値をステートにバインド
               onChange={(e) => setText(e.target.value)} // 入力値が変わった時にステートを更新
             />
-            <button type="submit">追加</button>
+            <button type="submit" className="button-yellow">追加</button>
           </form>
         )
       )}
       <ul>
         {getFilteredTodos().map((todo) => {
-          // 進捗率100%でタイトル欄のみグレースケール
           const isTitleDisabled = todo.progress === 100;
           return (
-            <li key={todo.id} style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-              {/* 進捗率ドロップリスト */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginRight: '0.5em' }}>
-                <label style={{ fontSize: '0.95em', color: '#333', marginBottom: '0.1em' }}>進捗率</label>
-                <select
-                  value={todo.progress}
-                  onChange={e => handleTodo(todo.id, 'progress', Number(e.target.value))}
-                  style={{ width: '70px', height: '38px' }}
-                  disabled={todo.delete_flg}
+            <li
+              key={todo.id}
+              style={{
+                display: 'flex',
+                flexDirection: 'column', // カード全体を縦並びに
+                alignItems: 'stretch',
+                position: 'relative',
+                background: '#fff',
+                borderRadius: '10px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                margin: '1em 0',
+                padding: '1em',
+                minWidth: 0,
+              }}
+            >
+              {/* 上部：タスク本体（横並び） */}
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {/* 進捗率ドロップリスト */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginRight: '0.5em' }}>
+                  <label style={{ fontSize: '0.95em', color: '#333', marginBottom: '0.1em' }}>進捗率</label>
+                  <select
+                    value={todo.progress}
+                    onChange={e => handleTodo(todo.id, 'progress', Number(e.target.value))}
+                    style={{ width: '70px', height: '38px', fontSize: '1em', lineHeight: '1.2', padding: '0 0.2em' }}
+                    disabled={todo.delete_flg}
+                  >
+                    {[...Array(11)].map((_, i) => (
+                      <option key={i * 10} value={i * 10}>{i * 10}%</option>
+                    ))}
+                  </select>
+                </div>
+                {/* 開始日・完了予定日 */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginRight: '1em' }}>
+                  <label style={{ fontSize: '0.95em', color: '#333', marginBottom: '0.1em' }}>開始日</label>
+                  <input
+                    type="date"
+                    value={todo.startDate}
+                    onChange={e => handleTodo(todo.id, 'startDate', e.target.value)}
+                    disabled={todo.delete_flg}
+                    style={{ marginBottom: '0.5em', width: '120px', height: '30px' }}
+                  />
+                  <label style={{ fontSize: '0.95em', color: '#333', marginBottom: '0.1em' }}>完了予定日</label>
+                  <input
+                    type="date"
+                    value={todo.endDate}
+                    onChange={e => handleTodo(todo.id, 'endDate', e.target.value)}
+                    disabled={todo.delete_flg}
+                    style={{ width: '120px', height: '30px' }}
+                  />
+                </div>
+                {/* タイトル入力欄（進捗率100%でグレースケール） */}
+                <div style={{ flexGrow: 1, marginRight: '1em', display: 'flex', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    disabled={todo.completed_flg || todo.delete_flg}
+                    value={todo.title}
+                    onChange={(e) => handleTodo(todo.id, 'title', e.target.value)}
+                    style={isTitleDisabled ? {
+                      width: '100%',
+                      background: '#e0e0e0',
+                      border: '1px solid #ccc',
+                      borderRadius: '5px',
+                      outline: 'none',
+                      fontSize: '1.1em',
+                      padding: '0.5em 0.2em',
+                      boxSizing: 'border-box',
+                      filter: 'grayscale(1)',
+                      opacity: 1,
+                      pointerEvents: 'none',
+                    } : {
+                      width: '100%',
+                      background: 'transparent',
+                      border: '1px solid #ccc',
+                      borderRadius: '5px',
+                      outline: 'none',
+                      fontSize: '1.1em',
+                      padding: '0.5em 0.2em',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+                {/* 編集・削除ボタン（編集を左、削除を右に） */}
+                <button
+                  onClick={() => handleToggleDetail(todo.id)}
+                  style={{ marginRight: '0.5em', backgroundColor: '#43a047', color: '#fff', border: 'none', borderRadius: '5px', height: '38px', width: '80px', fontSize: '1em', cursor: 'pointer' }}
                 >
-                  {[...Array(11)].map((_, i) => (
-                    <option key={i * 10} value={i * 10}>{i * 10}%</option>
-                  ))}
-                </select>
+                  {todo.showDetail ? '閉じる' : '編集'}
+                </button>
+                <button
+                  onClick={() => handleTodo(todo.id, 'delete_flg', !todo.delete_flg)}
+                  style={{ backgroundColor: '#dc3545', color: '#fff', border: 'none', borderRadius: '5px', height: '38px', width: '80px', fontSize: '1em', cursor: 'pointer' }}
+                >
+                  {todo.delete_flg ? '復元' : '削除'}
+                </button>
               </div>
-              {/* 開始日・完了予定日 */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginRight: '1em' }}>
-                <label style={{ fontSize: '0.95em', color: '#333', marginBottom: '0.1em' }}>開始日</label>
-                <input
-                  type="date"
-                  value={todo.startDate}
-                  onChange={e => handleTodo(todo.id, 'startDate', e.target.value)}
-                  disabled={todo.delete_flg}
-                  style={{ marginBottom: '0.5em', width: '120px', height: '30px' }}
-                />
-                <label style={{ fontSize: '0.95em', color: '#333', marginBottom: '0.1em' }}>完了予定日</label>
-                <input
-                  type="date"
-                  value={todo.endDate}
-                  onChange={e => handleTodo(todo.id, 'endDate', e.target.value)}
-                  disabled={todo.delete_flg}
-                  style={{ width: '120px', height: '30px' }}
-                />
-              </div>
-              {/* タイトル入力欄（進捗率100%でグレースケール） */}
-              <div style={isTitleDisabled ? { filter: 'grayscale(1)', pointerEvents: 'none', opacity: 0.7, flexGrow: 1, marginRight: '1em' } : { flexGrow: 1, marginRight: '1em' }}>
-                <input
-                  type="text"
-                  disabled={todo.completed_flg || todo.delete_flg}
-                  value={todo.title}
-                  onChange={(e) => handleTodo(todo.id, 'title', e.target.value)}
-                  style={{ width: '100%' }}
-                />
-              </div>
-              {/* 削除・編集ボタン */}
-              <button onClick={() => handleTodo(todo.id, 'delete_flg', !todo.delete_flg)}>
-                {todo.delete_flg ? '復元' : '削除'}
-              </button>
-              <button onClick={() => handleToggleDetail(todo.id)} style={{ marginLeft: '0.5em' }}>
-                {todo.showDetail ? '閉じる' : '編集'}
-              </button>
-              {/* 詳細アコーディオン */}
+              {/* 下部：詳細アコーディオン */}
               {todo.showDetail && (
                 <div style={{
-                  width: 'calc(100% - 200px)', // 進捗率～削除ボタンの幅に合わせる
-                  margin: '1em 0 0 0',
+                  marginTop: '1em',
                   padding: '1em',
-                  background: '#eee',
-                  borderRadius: '5px',
-                  boxShadow: '0 0 5px rgba(0,0,0,0.08)',
-                  position: 'absolute',
-                  left: '100px',
-                  zIndex: 1
+                  background: '#fff', // 白で統一
+                  borderRadius: '8px',
+                  boxShadow: 'none',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  border: '1px solid #e0e0e0',
+                  alignSelf: 'stretch',
                 }}>
-                  <div>詳細編集欄（ここに詳細項目を追加可能）</div>
+                  <textarea
+                    value={todo.detail || ''}
+                    onChange={e => handleTodo(todo.id, 'detail', e.target.value)}
+                    placeholder="詳細を入力..."
+                    style={{
+                      width: '100%',
+                      minHeight: '60px',
+                      resize: 'both', // 右下からリサイズ可
+                      border: '1px solid #ccc',
+                      borderRadius: '5px',
+                      fontSize: '1em',
+                      padding: '0.5em',
+                      background: '#fff',
+                      boxSizing: 'border-box',
+                      outline: 'none',
+                    }}
+                  />
                 </div>
               )}
             </li>
