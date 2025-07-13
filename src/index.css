@@ -17,7 +17,7 @@ body, html {
 
 
 .todo-container {
-  background-color: #d3d3d3;
+  background-color: #f0f0f0;
   padding: 2em;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -39,7 +39,7 @@ select, input[type='text'], button[type='submit'] {
 
 
 button[type='submit'] {
-  background-color: #007BFF;
+  background-color: #FFD600;
   color: #fff;
   border: none;
   cursor: pointer;
@@ -51,7 +51,7 @@ button[type='submit'] {
 
 
 button[type='submit']:hover {
-  background-color: #0056b3;
+  background-color: #FFC400;
 }
 
 
@@ -114,4 +114,37 @@ li button:hover {
 button[disabled] {
   background-color: #ccc;
   cursor: not-allowed;
+}
+
+
+.button-yellow {
+  background-color: #FFC107;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  height: 45px;
+  min-width: 100px;
+  font-size: 1.2em;
+  padding: 0.5em 1.5em;
+  border-radius: 5px;
+  margin: 0.5em 0;
+  white-space: nowrap;
+}
+
+
+.button-yellow.long {
+  min-width: 160px;
+  padding-left: 2em;
+  padding-right: 2em;
+}
+
+
+.button-yellow:hover {
+  background-color: #FFA000;
+}
+
+/* 入力欄フォーカス時のアウトラインを黄色で統一 */
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid #ffd600 !important; /* 明るい黄色 */
+  box-shadow: 0 0 0 2px #fff59d;
 }

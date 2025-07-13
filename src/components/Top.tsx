@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import CalendarView from './CalendarView';
 
 
 const Top = () => {
@@ -17,6 +18,7 @@ const Top = () => {
       <button onClick={goToTodos}>
         Todoリストへ
       </button>
+      <CalendarView />
     </div>
   );
 };
