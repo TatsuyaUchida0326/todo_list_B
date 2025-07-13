@@ -3,18 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import localforage from 'localforage';
 
 // Todo型に新しいプロパティを追加
-// startDate, endDate, progress, showDetail
-// "Todo" 型の定義をコンポーネント外で行います
 type Todo = {
   title: string;
   readonly id: number;
   completed_flg: boolean;
   delete_flg: boolean;
-  startDate: string; // yyyy-mm-dd 形式
-  endDate: string;   // yyyy-mm-dd 形式
-  progress: number;  // 0-100
-  showDetail: boolean; // アコーディオン表示
-  detail?: string; // 詳細自由入力欄
 };
 
 type Filter = 'all' | 'completed' | 'unchecked' | 'delete';
@@ -25,33 +18,12 @@ const Todo: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [text, setText] = useState('');
   const [nextId, setNextId] = useState(1);
-  const [filter, setFilter] = useState<Filter>('all');
-  const [currentDate, setCurrentDate] = useState(() => {
-    const today = new Date();
-    return today.toISOString().slice(0, 10);
-  });
+  const [filter, setFilter] = useState<Filter>('all');    
   const navigate = useNavigate();
 
-  // 日付を表示用に整形
-  const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
-  };
 
-  // 日付を1日進める/戻す
-  const changeDate = (diff: number) => {
-    const d = new Date(currentDate);
-    d.setDate(d.getDate() + diff);
-    setCurrentDate(d.toISOString().slice(0, 10));
-  };
-
-  // useEffect フックを使ってコンポーネントのマウント時にデータを取得
   useEffect(() => {
-    localforage.getItem('todo-20240622').then((values) => {
-      if (values) {
-        setTodos(values as Todo[]);
-      }
-    });
+    console.log('TODO!');
   }, []);
 
 
@@ -71,10 +43,6 @@ const Todo: React.FC = () => {
       id: nextId,
       completed_flg: false,
       delete_flg: false,
-      startDate: currentDate,
-      endDate: currentDate,
-      progress: 0,
-      showDetail: false,
     };
     setTodos((prevTodos) => [newTodo, ...prevTodos]);
     setNextId(nextId + 1);
@@ -96,6 +64,7 @@ const Todo: React.FC = () => {
         return todos.filter((todo) => !todo.delete_flg);
     }
   };
+  
   const handleFilterChange = (filter: Filter) => {
     setFilter(filter);
   };
@@ -126,12 +95,6 @@ const Todo: React.FC = () => {
     });
   };
 
-  // 編集ボタンで詳細アコーディオン表示切替
-  const handleToggleDetail = (id: number) => {
-    setTodos((todos) => todos.map((todo) =>
-      todo.id === id ? { ...todo, showDetail: !todo.showDetail } : todo
-    ));
-  };
 
   // 物理的に削除する関数
   const handleEmpty = () => {
