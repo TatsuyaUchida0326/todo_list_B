@@ -24,7 +24,6 @@ const Todo: React.FC = () => {
 
 
   useEffect(() => {
-    // ここに副作用の処理を書く
     console.log('TODO!');
   }, []);
 
